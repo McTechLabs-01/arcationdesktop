@@ -8,145 +8,74 @@ on:
       - main
 
 jobs:
-  build-msix:
+  build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fix AppxManifest
-        shell: powershell
+      - name: Fix manifest
+        shell: pwsh
         run: |
-          $manifest = "package-clean\AppxManifest.xml"
+          $file = "package-clean\AppxManifest.xml"
 
-          if (-not (Test-Path $manifest)) {
-            Write-Error "Manifest not found: $manifest"
-            exit 1
+          if (-not (Test-Path $file)) {
+            throw "AppxManifest.xml was not found."
           }
 
-          $content = Get-Content $manifest -Raw
+          $text = Get-Content $file -Raw
+          $text = $text.Replace('AppListEntry="auto"', 'AppListEntry="default"')
+          Set-Content $file $text -Encoding UTF8
 
-          # Windows MSIX only accepts:
-          # AppListEntry="default"
-          # AppListEntry="none"
-          $content = $content -replace 'AppListEntry="auto"', 'AppListEntry="default"'
+          Write-Host "Manifest fixed."
 
-          Set-Content -Path $manifest -Value $content -Encoding UTF8
-
-          Write-Host "Manifest fixed successfully."
-          Select-String -Path $manifest -Pattern "AppListEntry"
-
-      - name: Locate Windows SDK
-        shell: powershell
+      - name: Find MakeAppx
+        shell: pwsh
         run: |
-          $makeAppx = Get-ChildItem `
-            "C:\Program Files (x86)\Windows Kits\10\bin" `
-            -Filter MakeAppx.exe `
-            -Recurse `
-            -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match "\\x64\\MakeAppx\.exe$" } |
-            Sort-Object FullName -Descending |
+          $sdk = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Filter MakeAppx.exe -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "\\x64\\MakeAppx.exe$" } |
             Select-Object -First 1
 
-          if (-not $makeAppx) {
-            Write-Error "MakeAppx.exe was not found."
-            exit 1
+          if (-not $sdk) {
+            throw "MakeAppx.exe was not found."
           }
 
-          Write-Host "Found MakeAppx:"
-          Write-Host $makeAppx.FullName
+          "MAKEAPPX=$($sdk.FullName)" >> $env:GITHUB_ENV
 
-          "MAKEAPPX=$($makeAppx.FullName)" >> $env:GITHUB_ENV
-
-      - name: Validate manifest
-        shell: powershell
-        run: |
-          Write-Host "Checking manifest..."
-
-          if (-not (Test-Path "package-clean\AppxManifest.xml")) {
-            Write-Error "AppxManifest.xml is missing."
-            exit 1
-          }
-
-          Get-Content "package-clean\AppxManifest.xml"
-
-      - name: Prepare package directory
-        shell: powershell
-        run: |
-          $packageDir = "package-clean"
-
-          if (-not (Test-Path $packageDir)) {
-            Write-Error "Package directory not found."
-            exit 1
-          }
-
-          New-Item -ItemType Directory -Force -Path "build" | Out-Null
-
-          Write-Host "Package contents:"
-          Get-ChildItem $packageDir -Recurse
+          Write-Host "Using $($sdk.FullName)"
 
       - name: Build MSIX
-        shell: powershell
+        shell: pwsh
         run: |
-          $output = Join-Path $PWD "build\ArcationDesktop.msix"
-
-          if (Test-Path $output) {
-            Remove-Item $output -Force
-          }
-
-          Write-Host "Building MSIX..."
+          New-Item -ItemType Directory -Force -Path build | Out-Null
 
           & "$env:MAKEAPPX" pack `
             /d "$PWD\package-clean" `
-            /p "$output" `
+            /p "$PWD\build\ArcationDesktop.msix" `
             /o
 
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "MakeAppx failed with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
+            throw "MakeAppx failed."
           }
 
-          if (-not (Test-Path $output)) {
-            Write-Error "MSIX was not created."
-            exit 1
-          }
-
-          Write-Host "MSIX successfully created:"
-          Write-Host $output
-
-      - name: Verify MSIX package
-        shell: powershell
+      - name: Verify MSIX
+        shell: pwsh
         run: |
-          $package = "$PWD\build\ArcationDesktop.msix"
-
-          Write-Host "Verifying package..."
+          New-Item -ItemType Directory -Force -Path build\verify | Out-Null
 
           & "$env:MAKEAPPX" unpack `
-            /p "$package" `
+            /p "$PWD\build\ArcationDesktop.msix" `
             /d "$PWD\build\verify" `
             /o
 
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "MSIX verification failed."
-            exit $LASTEXITCODE
+            throw "MSIX verification failed."
           }
 
-          Write-Host "MSIX package verified successfully."
-
-      - name: Upload MSIX artifact
+      - name: Upload MSIX
         uses: actions/upload-artifact@v4
         with:
           name: ArcationDesktop-MSIX
           path: build/ArcationDesktop.msix
-          if-no-files-found: error
-
-      - name: Upload build information
-        uses: actions/upload-artifact@v4
-        with:
-          name: ArcationDesktop-Build-Info
-          path: |
-            package-clean/AppxManifest.xml
-            build/verify/AppxManifest.xml
-          if-no-files-found: warn
 ```
