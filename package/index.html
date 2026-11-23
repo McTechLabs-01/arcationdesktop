@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arcation Desktop</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><img src="https://arcation.lovable.app/__l5e/assets-v1/4492d761-ec77-4e63-ab16-8da7cbbbd382/arcation_emblem.png" alt="Arcation"></div>
+    <nav>
+      <button class="nav active" data-page="home" title="Home">⌂</button>
+      <button class="nav" data-page="discover" title="Discover">⌕</button>
+      <button class="nav" data-page="library" title="Library">🎮</button>
+      <button class="nav create" data-page="create" title="Create">＋</button>
+      <button class="nav" data-page="profile" title="Profile">●</button>
+    </nav>
+    <button class="nav settings" data-page="settings" title="Settings">⚙</button>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="window-title">Arcation</div><div class="top-actions"><button id="searchBtn">⌕</button><button id="accountBtn">Mc</button></div></header>
+    <section id="home" class="page active-page">
+      <div class="hero glass"><div><span class="eyebrow">CLOUD ARCADE</span><h1>Play without the faff.</h1><p>Instant games, creator-built experiences, and friends in a Windows 11-style desktop client.</p><div class="hero-actions"><button class="primary" data-page="discover">Discover games</button><button class="secondary" data-page="create">＋ Create</button></div></div><div class="hero-orb"></div></div>
+      <div class="section-head"><h2>Continue playing</h2><button class="link" data-page="library">View all</button></div>
+      <div class="cards"><article class="game-card" data-game="Neon Drift"><div class="game-art neon"></div><div><b>Neon Drift</b><span>Cloud arcade racer</span></div><button class="play">▶</button></article><article class="game-card" data-game="Bounce Arena"><div class="game-art bounce"></div><div><b>Bounce Arena</b><span>Physics party game</span></div><button class="play">▶</button></article><article class="game-card" data-game="Pixel Quest"><div class="game-art pixel"></div><div><b>Pixel Quest</b><span>Adventure</span></div><button class="play">▶</button></article></div>
+      <div class="section-head"><h2>Popular on Arcation</h2></div><div class="mini-grid"><div class="mini">🎮 <b>Creator picks</b><span>Fresh experiences from the community</span></div><div class="mini">⚡ <b>Instant play</b><span>Games stream straight into the player</span></div><div class="mini">👥 <b>Play together</b><span>Join friends and rooms</span></div></div>
+    </section>
+    <section id="discover" class="page"><div class="page-title"><div><span class="eyebrow">DISCOVER</span><h1>Find your next game.</h1></div><input id="gameSearch" placeholder="Search games…"></div><div id="discoverGrid" class="discover-grid"></div></section>
+    <section id="library" class="page"><div class="page-title"><div><span class="eyebrow">LIBRARY</span><h1>Your games.</h1></div></div><div class="empty-state"><div>🎮</div><h2>Your Arcation library</h2><p>Games you play or publish will appear here.</p><button class="primary" data-page="discover">Discover games</button></div></section>
+    <section id="create" class="page"><div class="page-title"><div><span class="eyebrow">CREATE</span><h1>Let's make something.</h1></div></div><div class="wizard glass"><div class="wizard-progress"><i></i></div><div id="wizardBody"></div><div class="wizard-actions"><button id="wizardBack" class="secondary">Back</button><button id="wizardNext" class="primary">Next</button></div></div></section>
+    <section id="studio" class="page studio-page"><div class="studio-top"><button id="backHome">←</button><b>Arcation Studio</b><span class="studio-project" id="studioProject">Untitled Experience</span><button id="testProject" class="primary small">▶ Test</button><button id="publishProject" class="secondary small">🚀 Publish</button></div><div class="studio-layout"><aside class="explorer"><b>EXPLORER</b><div>📁 project</div><div class="file active">📄 index.html</div><div class="file">📄 game.js</div><div class="file">🎨 assets</div></aside><div class="editor"><div class="tabs"><span class="tab active">index.html</span><span class="tab">game.js</span></div><pre id="codeEditor" contenteditable="true"></pre><div class="preview"><div class="preview-head">LIVE PREVIEW <button id="popOut">↗ Pop Out</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div></div><aside class="ai"><div class="ai-head"><span>✦ Arcation AI</span><button id="collapseAi">−</button></div><div id="aiChat" class="ai-chat"><div class="ai-msg bot">I’m ready. I know this project, can inspect its files, make changes, test them, and help prepare it for Arcation.</div></div><div class="ai-actions"><button data-ai="Add a start button">Start button</button><button data-ai="Make the background look better">Polish UI</button></div><div class="ai-input"><input id="aiInput" placeholder="Ask Arcation AI…"><button id="aiSend">➤</button></div></aside></div></section>
+    <section id="profile" class="page"><div class="page-title"><div><span class="eyebrow">PROFILE</span><h1>Mc</h1></div></div><div class="profile-card glass"><div class="avatar">Mc</div><div><h2>Mc</h2><p>Arcation creator</p></div></div></section>
+    <section id="settings" class="page"><div class="page-title"><div><span class="eyebrow">SETTINGS</span><h1>Arcation Desktop</h1></div></div><div class="settings-list glass"><label>Theme <select><option>Windows 11 Dark</option><option>Windows 11 Light</option></select></label><label>Integrated game player <input type="checkbox" checked></label><label>AI autonomous edits <input type="checkbox"></label></div></section>
+  </main>
+</div>
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="png" ContentType="image/png" />
+  <Default Extension="js" ContentType="application/javascript" />
+  <Default Extension="css" ContentType="text/css" />
+  <Default Extension="html" ContentType="text/html" />
+  <Default Extension="exe" ContentType="application/vnd.microsoft.portable-executable" />
+  <Override PartName="/AppxManifest.xml" ContentType="application/vnd.ms-appx.manifest+xml" />
+</Types>
