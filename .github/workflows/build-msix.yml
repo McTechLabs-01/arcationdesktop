@@ -1,0 +1,45 @@
+name: Build Arcation Desktop MSIX
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-msix:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find MakeAppx
+        shell: pwsh
+        run: |
+          $makeAppx = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin' -Filter MakeAppx.exe -Recurse |
+            Where-Object { $_.FullName -match '\\x64\\MakeAppx\.exe$' } |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1
+          if (-not $makeAppx) { throw 'MakeAppx.exe was not found in the installed Windows SDK.' }
+          "MAKEAPPX=$($makeAppx.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build MSIX with Microsoft MakeAppx
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          & "$env:MAKEAPPX" pack /o /h SHA256 /d package-clean /p out\ArcationDesktop.msix
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify package
+        shell: pwsh
+        run: |
+          & "$env:MAKEAPPX" unbundle /p out\ArcationDesktop.msix /d out\verify
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path out\ArcationDesktop.msix)) { throw 'MSIX was not created.' }
+
+      - name: Upload MSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArcationDesktop-MSIX
+          path: out/ArcationDesktop.msix
+          if-no-files-found: error
